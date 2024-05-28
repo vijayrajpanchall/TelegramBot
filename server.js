@@ -59,6 +59,10 @@ bot.command("generate", async (ctx) => {
     `Hey! ${from.first_name} kindly wait for a moment. I am curting posts for you...`
   );
 
+  const { message_id: loadingStickerMsgId } = await ctx.replyWithSticker(
+    "CAACAgIAAxkBAAMsZlVtgQ57IsCw_HeJI-4PnP06WHwAAlUAA6_GURpk5_zwJekQvzUE"
+  );
+
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
 
@@ -76,12 +80,10 @@ bot.command("generate", async (ctx) => {
 
   if (events.length === 0) {
     await ctx.deleteMessage(waitingMessageId);
+    await ctx.deleteMessage(loadingStickerMsgId);
     await ctx.reply("No events for the dat");
     return;
   }
-
-  console.log("Events:  ", events);
-  //make openai api call
 
   try {
     const chatCompletion = await openai.chat.completions.create({
@@ -100,7 +102,6 @@ bot.command("generate", async (ctx) => {
       ],
       model: "gpt-3.5-turbo",
     });
-    console.log("completion", chatCompletion);
 
     await userModel.findOneAndUpdate(
       {
@@ -114,16 +115,22 @@ bot.command("generate", async (ctx) => {
       }
     );
 
-        await ctx.deleteMessage(waitingMessageId);
+    await ctx.deleteMessage(waitingMessageId);
+    await ctx.deleteMessage(loadingStickerMsgId);
+
     await ctx.reply(chatCompletion.choices[0].message.content);
   } catch (error) {
-    console.log(error);
     await ctx.reply("Facing difficulties");
   }
 
   //store token count
   //send response.
 });
+
+//to get sticker ID only
+// bot.on(message('sticker'), (ctx) => {
+//   console.log("sticker", ctx.update.message);
+// });
 
 bot.on(message("text"), async (ctx) => {
   const from = ctx.update.message.from;
