@@ -13,7 +13,6 @@ const userSchema = mongoose.Schema(
     },
     lastName: {
       type: String,
-      required: true,
     },
     isBot: {
       type: Boolean,
@@ -26,11 +25,11 @@ const userSchema = mongoose.Schema(
     },
     promptToken: {
       type: Number,
-      required: false,
+      default: 0,
     },
     completionTokens: {
       type: Number,
-      required: false,
+      default: 0,
     },
   },
   { timestamps: true }
